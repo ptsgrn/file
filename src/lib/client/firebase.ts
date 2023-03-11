@@ -79,7 +79,6 @@ function providerFor(name: string) {
 }
 
 function handleAuthError(err: Error) {
-	console.error(err);
 	isUnauthorized.set(true);
 	isLoggingIn.set(false);
 }

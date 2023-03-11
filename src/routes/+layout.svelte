@@ -29,7 +29,6 @@
 	let files: File[] = [];
 	function dropFiles({ dataTransfer }) {
 		if (!dataTransfer.files) return;
-		console.log(dataTransfer.files);
 		files = [...dataTransfer.files];
 		files.forEach((file) => {
 			$fileData = [
@@ -47,6 +46,52 @@
 	}
 	let over = false;
 </script>
+
+<svelte:head>
+	<!-- no google and other bot index -->
+	<meta name="robots" content="noindex" />
+	<!-- other social -->
+	<meta name="og:image" content="/file-social-preview.jpg?cover=1200,630" />
+	<meta name="og:title" content="📁 FILE" />
+	<meta name="og:description" content="FILE? File file, file file FIRE!" />
+	<meta name="og:url" content="https://file.ptsgrn.dev" />
+	<meta name="og:site_name" content="Patsagorn's File" />
+	<meta name="og:type" content="website" />
+	<meta name="og:locale" content="en_US" />
+	<meta name="og:locale:alternate" content="th_TH" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:site" content="@ptsgrn" />
+	<meta name="twitter:creator" content="@ptsgrn" />
+	<meta name="twitter:title" content="📁 FILE" />
+	<meta name="twitter:description" content="FILE? File file, file file FIRE!" />
+	<meta name="twitter:image" content="/file-social-preview.jpg?cover=1200,630" />
+	<meta name="twitter:image:alt" content="FILE? File file, file file FIRE!" />
+	<meta name="twitter:image:width" content="1200" />
+	<meta name="twitter:image:height" content="630" />
+	<meta name="twitter:domain" content="file.ptsgrn.dev" />
+
+	<!-- PWA spec -->
+	<link rel="manifest" href="/manifest.json" />
+	<meta name="theme-color" content="#161616" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="apple-mobile-web-app-title" content="FILE" />
+	<link rel="apple-touch-icon" href="/file-icons.png?contain=192,192" />
+	<link rel="apple-touch-startup-image" href="/file-icons.png?contain=192,192" />
+	<meta name="msapplication-TileImage" content="/file-icons.png?contain=192,192" />
+	<meta name="msapplication-TileColor" content="#161616" />
+	<meta name="msapplication-config" content="none"/>
+	<meta name="application-name" content="FILE" />
+	<meta name="msapplication-tooltip" content="FILE? File file, file file FIRE!" />
+	<meta name="msapplication-starturl" content="/" />
+	<meta name="msapplication-navbutton-color" content="#161616" />
+	<meta name="msapplication-TileImage" content="/file-icons.png?contain=192,192" />
+	<meta name="msapplication-TileColor" content="#161616" />
+	<meta name="msapplication-square70x70logo" content="/file-icons.png?contain=70,70" />
+	<meta name="msapplication-square150x150logo" content="/file-icons.png?contain=150,150" />
+	<meta name="msapplication-wide310x150logo" content="/file-icons.png?contain=310,150" />
+	<meta name="msapplication-square310x310logo" content="/file-icons.png?contain=310,310" />
+</svelte:head>
 
 <div
 	on:drop

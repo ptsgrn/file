@@ -1,0 +1,51 @@
+{
+  "name": "FILE",
+  "short_name": "FILE",
+  "theme_color": "#161616",
+  "background_color": "#161616",
+  "display": "fullscreen",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/file-icons.png?contain=72,72",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=96,96",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=128,128",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=144,144",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=152,152",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=192,192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=384,384",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/file-icons.png?contain=512,512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

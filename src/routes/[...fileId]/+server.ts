@@ -24,8 +24,6 @@ export const GET = (async ({ params, url }) => {
 			}
 		});
 	} catch (err: unknown) {
-		// check if err is ImageManipulationError
-		console.error(err);
 		if (err instanceof ImageManipulationError) throw error(400, err.message);
 		// @ts-ignore
 		if (err.code === 404) throw error(404, 'File not found');
