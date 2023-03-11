@@ -5,15 +5,11 @@
  https://opensource.org/licenses/MIT
 -->
 <script>
-	import {
-		InlineLoading,
-		ListItem,
-		SkeletonText,
-		UnorderedList
-	} from 'carbon-components-svelte';
+	import { InlineLoading, ListItem, SkeletonText, UnorderedList } from 'carbon-components-svelte';
 	import { getAllImagesInRef } from '$lib/client/firebase';
 	import { browser } from '$app/environment';
 </script>
+
 {#await getAllImagesInRef()}
 	<InlineLoading />
 	<SkeletonText />

@@ -9,12 +9,19 @@
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { initializeFirebase } from '$lib/client/firebase';
-	import { PUBLIC_FIREBASE_CLIENT_CONFIG } from '$env/static/public';
 	import { Content, ToastNotification } from 'carbon-components-svelte';
 	import { files as filesStore, fileData } from '$lib/files';
 	if (browser) {
 		try {
-			initializeFirebase(JSON.parse(PUBLIC_FIREBASE_CLIENT_CONFIG));
+			initializeFirebase({
+				apiKey: 'AIzaSyAvJSdy51pvcFzbRzrkamJrdeNECVltmqM',
+				authDomain: 'patsagonesite.firebaseapp.com',
+				projectId: 'patsagonesite',
+				storageBucket: 'patsagonesite.appspot.com',
+				messagingSenderId: '908887098198',
+				appId: '1:908887098198:web:75a1f07127287958d24cf7',
+				measurementId: 'G-ZY168V3W1D'
+			});
 		} catch (ex) {
 			console.error(ex);
 		}
