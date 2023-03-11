@@ -12,6 +12,12 @@
 	import { Column, Grid, Row } from 'carbon-components-svelte';
 </script>
 
+<svelte:head>
+	<title>FILE</title>
+	<!-- no google and other bot index -->
+	<meta name="robots" content="noindex" />
+</svelte:head>
+
 <!-- <button on:click|preventDefault={signOut}>Logout</button> -->
 <Grid>
 	<Row>

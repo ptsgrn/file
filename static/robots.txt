@@ -1,0 +1,4 @@
+# robots.txt for https://file.ptsgrn.dev
+# Do not index all page and files in this site
+User-agent: *
+Disallow: /

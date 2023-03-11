@@ -7,7 +7,8 @@ function initializeFirebase() {
 		const serviceAccount = JSON.parse(FIREBASE_SERVER_CONFIG);
 		admin.initializeApp({
 			credential: admin.credential.cert(serviceAccount),
-			databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
+			databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`,
+			storageBucket: `${serviceAccount.project_id}.appspot.com`
 		});
 	}
 }
@@ -44,4 +45,20 @@ export async function createDocument(collectionPath: string, uid: string): Promi
 	const document = <Document>doc.data(); // Just need the data on the server
 	document._id = doc.id;
 	return document;
+}
+
+export async function getImageBuffer(filename: string): Promise<Buffer> {
+	initializeFirebase();
+	const bucket = admin.storage().bucket();
+	const file = bucket.file(filename);
+	const [buffer] = await file.download();
+	return buffer;
+}
+
+export async function getImageMetadata(filename: string): Promise<admin.storage.FileMetadata> {
+	initializeFirebase();
+	const bucket = admin.storage().bucket();
+	const file = bucket.file(filename);
+	const [metadata] = await file.getMetadata();
+	return metadata;
 }
