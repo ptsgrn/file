@@ -11,6 +11,7 @@
 		Button,
 		DataTable,
 		FileUploaderDropContainer,
+		InlineLoading,
 		OverflowMenu,
 		OverflowMenuItem,
 		TextArea,
@@ -60,6 +61,15 @@
 		if (!$fileData.length) return;
 		console.log($fileData);
 		$fileData.forEach((item) => {
+			$fileData = $fileData.map((item) => {
+				if (item.name === item.name) {
+					return {
+						...item,
+						status: 'uploading'
+					};
+				}
+				return item;
+			});
 			uploadFileToFirebase(item.name, item.file, {
 				customMetadata: {
 					'content-type': item.type,
@@ -73,7 +83,7 @@
 						if (item.name === snapshot.metadata.name) {
 							return {
 								...item,
-								isUploaded: true,
+								status: 'uploaded',
 								snapshot: snapshot
 							};
 						}
@@ -100,7 +110,7 @@
 	headers={[
 		{
 			value: 'Status',
-			key: 'isUploaded'
+			key: 'status'
 		},
 		{
 			value: 'Name',
@@ -158,7 +168,8 @@
 			<TextArea
 				value={cell.value}
 				rows={2}
-				disabled={$fileData[rowIndex].isUploaded}
+				disabled={$fileData[rowIndex].status === 'uploaded' ||
+					$fileData[rowIndex].status === 'uploading'}
 				on:change={(e) => {
 					let name = e.target?.value || cell.value;
 					// check if name is a valid file name
@@ -174,23 +185,29 @@
 			/>
 		{:else if cell.key === 'size'}
 			{filesize(cell.value)}
-		{:else if cell.key === 'isUploaded'}
-			{#if cell.value}
+		{:else if cell.key === 'status'}
+			{#if cell.value === 'uploaded'}
 				<Button
 					size="small"
 					kind="ghost"
 					on:click={async () => {
-						let url = await publicURL($fileData[rowIndex].name);
-						// copy url to clipboard
+						let url = `https://file.ptsgrn.dev/${$fileData[rowIndex].name}`;
 						navigator.clipboard.writeText(url);
 					}}
 					icon={CheckmarkOutline}
 					iconDescription="Copy link to file"
 				/>
+			{:else if cell.value === 'uploading'}
+				<InlineLoading status="active" description="Uploading file" />
 			{/if}
 		{:else}
 			{cell.value}
 		{/if}
 	</svelte:fragment>
 </DataTable>
-<Button kind="primary" icon={CloudUpload} on:click={uploadFile}>Upload</Button>
+<Button
+	disabled={!$fileData.length || $fileData.some((item) => item.status === 'uploading')  || !$fileData.some((item) => !item.status)}
+	kind="primary"
+	icon={CloudUpload}
+	on:click={uploadFile}>Upload</Button
+>

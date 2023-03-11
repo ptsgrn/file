@@ -10,7 +10,7 @@ interface FileData {
 	name: string;
 	size: number;
 	type: string;
-	isUploaded: boolean;
+	status: string;
 	file: File;
 	snapshot?: unknown;
 	error?: unknown;

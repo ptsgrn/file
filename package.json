@@ -37,6 +37,7 @@
 		"@picocss/pico": "^1.5.7",
 		"filesize": "^10.0.6",
 		"firebase": "^9.17.2",
-		"firebase-admin": "^11.5.0"
+		"firebase-admin": "^11.5.0",
+		"jimp": "^0.22.7"
 	}
 }

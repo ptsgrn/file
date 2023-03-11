@@ -47,7 +47,7 @@ export async function createDocument(collectionPath: string, uid: string): Promi
 	return document;
 }
 
-export async function getImageBuffer(filename: string): Promise<Buffer> {
+export async function getFileBuffer(filename: string): Promise<Buffer> {
 	initializeFirebase();
 	const bucket = admin.storage().bucket();
 	const file = bucket.file(filename);
@@ -55,7 +55,7 @@ export async function getImageBuffer(filename: string): Promise<Buffer> {
 	return buffer;
 }
 
-export async function getImageMetadata(filename: string): Promise<admin.storage.FileMetadata> {
+export async function getFileMetadata(filename: string): Promise<admin.storage.FileMetadata> {
 	initializeFirebase();
 	const bucket = admin.storage().bucket();
 	const file = bucket.file(filename);
