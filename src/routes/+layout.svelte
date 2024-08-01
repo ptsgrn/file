@@ -6,7 +6,6 @@
 -->
 <script lang="ts">
 	import 'carbon-components-svelte/css/g100.css';
-	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { initializeFirebase } from '$lib/client/firebase';
 	import { PUBLIC_FIREBASE_CLIENT_CONFIG } from '$env/static/public';
@@ -67,9 +66,9 @@
 
 <style lang="scss">
 	div {
-		[data-isdragover] {
-			background-color: #e0e0e0;
-		}
+		// [data-isdragover] {
+		// 	background-color: #e0e0e0;
+		// }
 		&.drop-file-dialog {
 			&[data-dragover='true'] {
 				&::before {

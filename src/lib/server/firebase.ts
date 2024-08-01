@@ -1,31 +1,33 @@
 import { FIREBASE_SERVER_CONFIG } from '$env/static/private';
-import type { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import admin from 'firebase-admin';
 
-function initializeFirebase() {
-	if (!admin.apps.length) {
+export function initializeFirebase() {
+	if (admin.apps && admin.apps.length) {
+		return admin.apps[0] as admin.app.App;
+	} else {
 		const serviceAccount = JSON.parse(FIREBASE_SERVER_CONFIG);
-		admin.initializeApp({
+		const app = admin.initializeApp({
 			credential: admin.credential.cert(serviceAccount),
 			databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
 		});
+		return app
 	}
 }
 
-export async function decodeToken(token: string): Promise<DecodedIdToken | null> {
+export async function decodeToken(token: string) {
 	if (!token || token === 'null' || token === 'undefined') return null;
 	try {
-		initializeFirebase();
-		return await admin.auth().verifyIdToken(token);
+		const app = initializeFirebase();
+		return await app.auth().verifyIdToken(token);
 	} catch (err) {
 		return null;
 	}
 }
 
-export async function getDocuments(collectionPath: string, uid: string): Promise<Array<Document>> {
+export async function getDocuments(collectionPath: string, uid: string) {
 	if (!uid) return [];
-	initializeFirebase();
-	const db = admin.firestore();
+	const app = initializeFirebase();
+	const db = app.firestore();
 	const querySnapshot = await db.collection(collectionPath).where('uid', '==', uid).get();
 	const list: Array<Document> = [];
 	querySnapshot.forEach((doc) => {
@@ -36,12 +38,12 @@ export async function getDocuments(collectionPath: string, uid: string): Promise
 	return list;
 }
 
-export async function createDocument(collectionPath: string, uid: string): Promise<Document> {
-	initializeFirebase();
-	const db = admin.firestore();
+export async function createDocument(collectionPath: string, uid: string) {
+	const app = initializeFirebase();
+	const db = app.firestore();
 	const doc = await (await db.collection(collectionPath).add({ uid })).get();
 
-	const document = <Document>doc.data(); // Just need the data on the server
+	const document = doc.data()!; // Just need the data on the server
 	document._id = doc.id;
 	return document;
 }
