@@ -3,8 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import type { UserCredential } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { writable } from 'svelte/store';
 
 export const isLogin = writable<boolean>(false);
-export const user = writable<UserCredential>();
+export const user = writable<User | null>();

@@ -11,35 +11,36 @@
 	import Unlock from 'carbon-pictograms-svelte/lib/Unlock_01.svelte';
 	import DoNot from 'carbon-pictograms-svelte/lib/DoNot_02.svelte';
 	import KeepYourOwnKey from 'carbon-pictograms-svelte/lib/KeepYourOwnKey.svelte';
+	import { user } from '$lib/user';
 </script>
 
-<div
-	role="button"
-	data-action={$page.data.userSession?.name ? 'logout' : 'login'}
-	on:keypress={() => {}}
-	on:keydown={() => {}}
+<button
+	data-action={$user ? 'logout' : 'login'}
 	on:click={() => {
-		if ($page.data.userSession?.name) {
+		if ($user) {
 			signOut();
 		} else {
 			signInWith('google');
 		}
 	}}
 >
-	{#if $page.data.userSession?.name}
-		<span>{$page.data.userSession?.name}</span><Unlock title="Logout" width="40px" />
-	{:else if $isLoggingIn}
+	{#if $user}
+		<span>{$user.displayName}</span><Unlock title="Logout" width="40px" />
+	{:else if $user}
 		<KeepYourOwnKey title="Logging in" width="150px" height="150px" />
-	{:else if !$isLoggingIn && !$isUnauthorized}
+	{:else if !$user && !$isUnauthorized}
 		<Lock title="Login" width="150px" height="150px" />
-	{:else if !$isLoggingIn && $isUnauthorized}
+	{:else if !$user && $isUnauthorized}
 		<DoNot title="Not authorized" width="150px" height="150px" />
 	{/if}
-</div>
+</button>
 
 <style lang="scss">
-	[role='button'] {
+	button {
 		cursor: pointer;
+		background: none;
+		border: none;
+		color: #ccc;
 
 		&[data-action='login'] {
 			display: flex;

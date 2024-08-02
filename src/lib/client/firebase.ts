@@ -18,8 +18,8 @@ import {
 import type { FirebaseStorage } from 'firebase/storage';
 import { browser } from '$app/environment';
 import { initializeApp } from 'firebase/app';
-import { invalidateAll } from '$app/navigation';
 import { writable } from 'svelte/store';
+import { user } from '$lib/user';
 
 export const isUnauthorized = writable(false);
 export const isLoggingIn = writable(false);
@@ -40,14 +40,8 @@ function listenForAuthChanges() {
 
 	onIdTokenChanged(
 		auth,
-		async (user) => {
-			if (user) {
-				const token = await user.getIdToken();
-				await setToken(token);
-			} else {
-				await setToken('');
-			}
-			await invalidateAll();
+		async (userData) => {
+			user.set(userData);
 		},
 		(err) => console.error('hi', err.message)
 	);

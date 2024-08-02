@@ -7,7 +7,6 @@ import { initializeFirebase } from '$lib/server/firebase';
 import { BUCKET_NAME } from '$env/static/private';
 
 const app = initializeFirebase()
-const MAX_DOWNLOAD_SIZE_BYTES = 1024 * 1024 * 50
 
 export async function GET({ params }) {
   const { filename } = params
