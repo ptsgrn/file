@@ -1,284 +1,111 @@
-<!--
- Copyright (c) 2023 Patsagorn Y.
- 
- This software is released under the MIT License.
- https://opensource.org/licenses/MIT
--->
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { publicURL, uploadFile as uploadFileToFirebase } from '$lib/client/firebase';
+	import { DownloadURL, UploadTask, StorageList } from 'sveltefire';
 	import {
+		FileUploader,
 		Button,
-		DataTable,
+		ProgressBar,
 		FileUploaderDropContainer,
-		OverflowMenu,
-		OverflowMenuItem,
-		TextArea,
-		Toolbar,
-		ToolbarContent,
-		ToolbarMenu,
-		ToolbarMenuItem
+		Toggle,
+		Form
 	} from 'carbon-components-svelte';
-	import CheckmarkOutline from 'carbon-icons-svelte/lib/CheckmarkOutline.svelte';
-	import { files as filesStore, fileData } from '$lib/files';
+	import Copy from 'carbon-icons-svelte/lib/Copy.svelte';
 	import { filesize } from 'filesize';
-	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
-	import CloudUpload from 'carbon-icons-svelte/lib/CloudUpload.svelte';
-	import {
-		getStorage,
-		list,
-		listAll,
-		ref,
-		type ListResult,
-		type StorageReference
-	} from 'firebase/storage';
-	import { getApp } from 'firebase/app';
-	import { onMount } from 'svelte';
+	import slugify from 'slugify';
+	import { nanoid } from 'nanoid';
+	import { StorageError, type StorageReference } from 'firebase/storage';
+	import { toast } from 'svelte-sonner';
 
-	let fileInput: HTMLInputElement;
+	let fileUploader: FileUploader;
 	let files: File[] = [];
-	$filesStore.forEach((item, i) => {
-		$fileData.push({
-			id: i,
-			name: item.name,
-			size: item.size,
-			type: item.type,
-			file: item,
-			isUploaded: false
-		});
-	});
+	let isFilenameScrumbled = false;
 
-	function appendFile() {
-		if (!files) return;
-		$fileData = [
-			...$fileData,
-			...files.map((file, i) => ({
-				id: i,
-				name: file.name,
-				size: file.size,
-				type: file.type,
-				file,
-				isUploaded: false
-			}))
-		];
+	function slugifyFilename(filename: string) {
+		const ext = filename.split('.').pop();
+		const filename_parts = filename.split('.').slice(0, -1).join('.');
+		if (isFilenameScrumbled) {
+			return nanoid(21) + '.' + ext;
+		}
+		return (
+			slugify(filename_parts, { locale: 'en', lower: true, trim: true }) +
+			'-' +
+			nanoid(6) +
+			'.' +
+			ext
+		);
 	}
 
-	function uploadFile() {
-		if (!$fileData.length) return;
-		console.log($fileData);
-		$fileData.forEach((item) => {
-			uploadFileToFirebase(item.name, item.file, {
-				customMetadata: {
-					'content-type': item.type,
-					uploaded_by: $page.data.userSession?.name,
-					uploaded_at: new Date().toISOString()
-				}
-			})
-				.then((snapshot) => {
-					console.log(snapshot);
-					$fileData = $fileData.map((item) => {
-						if (item.name === snapshot.metadata.name) {
-							return {
-								...item,
-								isUploaded: true,
-								snapshot: snapshot
-							};
-						}
-						return item;
-					});
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-		});
+	async function copyPublicLink(ref: StorageReference | null) {
+		if (!ref) return;
+		const url = `${$page.url.origin}/${ref.name}`;
+		navigator.clipboard.writeText(url);
+		toast.success(`Public link copied to clipboard: ${ref.name}`);
 	}
-
-	const app = getApp();
-	const storage = getStorage(app);
-	const filesRef = ref(storage, 'p/');
-	let fileList: ListResult & { items: { id: string }[] };
-	let filePerPageCount: number = 100;
-	onMount(async () => {
-		fileList = (await listAll(filesRef)).items.map((item) => ({
-			id: item.fullPath,
-			...item
-		}));
-	});
 </script>
 
 <FileUploaderDropContainer
 	multiple
 	labelText="Drag and drop files here or click to upload"
-	ref={fileInput}
 	bind:files
-	on:change={appendFile}
-	kind="primary"
 />
+<Toggle labelText="Scrumble file name" bind:value={isFilenameScrumbled} />
 
-<DataTable
-	headers={[
-		{
-			value: 'Status',
-			key: 'isUploaded'
-		},
-		{
-			value: 'Name',
-			key: 'name'
-		},
-		{
-			value: 'Size',
-			key: 'size'
-		},
-		{
-			value: 'Type',
-			key: 'type'
-		},
-		{
-			value: 'Action',
-			key: 'action'
-		}
-	]}
-	bind:rows={$fileData}
-	sortable
->
-	<Toolbar>
-		<ToolbarContent>
-			<ToolbarMenu>
-				<ToolbarMenuItem primaryFocus>Reset</ToolbarMenuItem>
-			</ToolbarMenu>
-			<Button
-				kind="danger"
-				on:click={() => {
-					$fileData = [];
-				}}>Remove all</Button
+{#if files.length > 0}
+	{#each files as file}
+		{@const filename = slugifyFilename(file.name)}
+		<UploadTask ref={`p/${filename}`} data={file} let:progress let:snapshot>
+			<span
+				id={filename}
+				class:bx--file__selected-file={true}
+				class:bx--file__selected-file--invalid={snapshot?.state === 'error'}
+				class="bx--file__selected-file--md"
 			>
-		</ToolbarContent>
-	</Toolbar>
-	<svelte:fragment slot="cell" let:rowIndex let:cell>
-		{#if cell.key === 'action'}
-			<div style:display="flex">
-				<Button
-					kind="danger"
-					size="small"
-					icon={TrashCan}
-					iconDescription="Remove"
-					on:click={() => {
-						$fileData = $fileData.filter((item) => item.id !== rowIndex);
-					}}
-				/>
-				<OverflowMenu flipped size="sm">
-					<OverflowMenuItem text="Upload" />
-					<OverflowMenuItem text="Download" />
-				</OverflowMenu>
-			</div>
-		{:else if cell.key === 'id'}
-			{cell.value + 1}
-		{:else if cell.key === 'name'}
-			<TextArea
-				value={cell.value}
-				rows={2}
-				disabled={$fileData[rowIndex].isUploaded}
-				on:change={(e) => {
-					let name = e.target?.value || cell.value;
-					// check if name is a valid file name
-					let validFileName = name.match(/^[^\\/:*?"<>|]+$/);
-					if (!validFileName) {
-						e.target?.setCustomValidity('Invalid file name');
-						e.target?.reportValidity();
-						e.target.value = cell.value;
-						return;
-					}
-					$fileData[rowIndex].name = name;
-				}}
-			/>
-		{:else if cell.key === 'size'}
-			{filesize(cell.value)}
-		{:else if cell.key === 'isUploaded'}
-			{#if cell.value}
-				<Button
-					size="small"
-					kind="ghost"
-					on:click={async () => {
-						let url = await publicURL($fileData[rowIndex].name);
-						// copy url to clipboard
-						navigator.clipboard.writeText(url);
-					}}
-					icon={CheckmarkOutline}
-					iconDescription="Copy link to file"
-				/>
-			{/if}
-		{:else}
-			{cell.value}
-		{/if}
-	</svelte:fragment>
-</DataTable>
-<Button kind="primary" icon={CloudUpload} on:click={uploadFile}>Upload</Button>
+				<p class:bx--file-filename={true}>
+					{filename}
+					<ProgressBar
+						status={snapshot?.state === 'running'
+							? 'active'
+							: snapshot?.state === 'success'
+								? 'finished'
+								: snapshot?.state === 'error'
+									? 'error'
+									: undefined}
+						value={progress}
+						labelText={snapshot?.state}
+						helperText={snapshot?.state === 'running'
+							? `${progress.toFixed(2)}% uploaded`
+							: snapshot?.state === 'success'
+								? filename
+								: '?'}
+					/>
+				</p>
 
-<DataTable
-	headers={[
-		{
-			value: 'id',
-			key: 'id'
-		}
-	]}
-	bind:rows={fileList}
-	sortable
->
-	<Toolbar>
-		<ToolbarContent>
-			<ToolbarMenu>
-				<ToolbarMenuItem primaryFocus>Reset</ToolbarMenuItem>
-			</ToolbarMenu>
-		</ToolbarContent>
-	</Toolbar>
-	<svelte:fragment slot="cell" let:rowIndex let:cell>
-		{#if cell.key === 'action'}
-			<div style:display="flex">
-				<Button
-					kind="danger"
-					size="small"
-					icon={TrashCan}
-					iconDescription="Remove"
-					on:click={() => {
-						$fileData = $fileData.filter((item) => item.id !== rowIndex);
-					}}
-				/>
-				<OverflowMenu flipped size="sm">
-					<OverflowMenuItem text="Upload" />
-					<OverflowMenuItem text="Download" />
-				</OverflowMenu>
-			</div>
-		{:else if cell.key === 'id'}
-			{cell.value + 1}
-		{:else if cell.key === 'name'}
-			<TextArea
-				value={cell.value}
-				rows={2}
-				disabled={$fileData[rowIndex].isUploaded}
-				on:change={(e) => {}}
-			/>
-		{:else if cell.key === 'size'}
-			{filesize(cell.value)}
-		{:else if cell.key === 'isUploaded'}
-			{#if cell.value}
-				<Button
-					size="small"
-					kind="ghost"
-					on:click={async () => {
-						let url = await publicURL($fileData[rowIndex].name);
-						// copy url to clipboard
-						navigator.clipboard.writeText(url);
-					}}
-					icon={CheckmarkOutline}
-					iconDescription="Copy link to file"
-				/>
-			{/if}
-		{:else}
-			{cell.value}
-		{/if}
-	</svelte:fragment>
-</DataTable>
-
-<pre style="font-family:'Courier New', Courier, monospace">
-	{JSON.stringify(fileList, null, 2)}
-</pre>
+				{#if snapshot?.state === 'error'}
+					<div class:bx--form-requirement={true}>
+						{#await snapshot.task.catch((error) => error) then err}
+							{#if err instanceof StorageError}
+								<div class:bx--form-requirement__title={true}>
+									{err.name} (<code>{err.code}</code>)
+								</div>
+								<p class:bx--form-requirement__supplement={true}>{err.message}</p>
+							{/if}
+						{/await}
+					</div>
+				{/if}
+				<p>
+					{#if snapshot?.state === 'success'}
+						<DownloadURL ref={snapshot.ref} let:link let:ref>
+							<Button
+								size="field"
+								icon={Copy}
+								kind="ghost"
+								iconDescription="Copy public link to clipboard"
+								on:click={() => copyPublicLink(ref)}
+							/>
+						</DownloadURL>
+					{/if}
+				</p>
+			</span>
+		</UploadTask>
+	{/each}
+{/if}

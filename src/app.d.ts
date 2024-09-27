@@ -2,11 +2,12 @@
 // for information about these interfaces
 
 import type { UserSession } from '$lib/types';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 declare global {
 	namespace App {
 		interface Locals {
-			userSession: UserSession;
+			user: DecodedIdToken | null;
 		}
 		// interface Error {}
 		// interface PageData {}
